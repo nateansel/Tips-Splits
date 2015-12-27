@@ -30,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     let sharedDefaults : NSUserDefaults = NSUserDefaults()
     let rootView = self.window?.rootViewController as! ViewController
-    sharedDefaults.setObject(NSDate(timeIntervalSinceNow: 30), forKey: "appExitDate")
+    sharedDefaults.setObject(NSDate(timeIntervalSinceNow: 600), forKey: "appExitDate")  // sets the appExitDate for now plus 10 minutes
     sharedDefaults.setObject(rootView.billField.text!, forKey: "appExitBillAmount")
     rootView.billField.text = ""
   }
