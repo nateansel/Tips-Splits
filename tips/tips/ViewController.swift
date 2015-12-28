@@ -61,6 +61,8 @@ class ViewController: UIViewController {
     tipLabel.text = "$0.00"
     totalLabel.text = "$0.00"
     
+    
+    sharedDefaults.setBool(true, forKey: "refreshTipValues")
     tipAmount.selectedSegmentIndex = sharedDefaults.integerForKey("defaultTipIndex")
     UIApplication.sharedApplication().statusBarStyle = .LightContent
     NSNotificationCenter.defaultCenter().postNotificationName("colorSchemeChanged", object: nil)
@@ -81,7 +83,15 @@ class ViewController: UIViewController {
   override func viewWillAppear(animated: Bool) {
     super.viewWillAppear(animated)
     
-    billField.text = ""
+    if let appLastOpen = sharedDefaults.objectForKey("appExitDate") as! NSDate? {
+      print("comparing")
+      if NSDate().compare(appLastOpen) == .OrderedAscending {
+        billField.text = sharedDefaults.stringForKey("appExitBillAmount")
+      }
+      else {
+        billField.text = ""
+      }
+    }
     tipViewConstraint.constant = view.frame.size.height
     textFieldChange(self)
   }
@@ -145,7 +155,7 @@ class ViewController: UIViewController {
         })
       case 1:
         let orangeColor      = UIColor(red:1, green:0.47, blue:0.2, alpha:1)
-        let lightOrangeColor = UIColor(red:1, green:0.56, blue:0.43, alpha:1)
+        let lightOrangeColor = UIColor(red:1, green:0.81, blue:0.18, alpha:1)
         UIView.animateWithDuration(0.25,
           animations: {
             self.tipView.backgroundColor               = orangeColor

@@ -32,20 +32,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let rootView = self.window?.rootViewController as! ViewController
     sharedDefaults.setObject(NSDate(timeIntervalSinceNow: 600), forKey: "appExitDate")  // sets the appExitDate for now plus 10 minutes
     sharedDefaults.setObject(rootView.billField.text!, forKey: "appExitBillAmount")
-    rootView.billField.text = ""
+    print(rootView.billField.text!)
   }
 
   func applicationWillEnterForeground(application: UIApplication) {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-    
-    let sharedDefaults = NSUserDefaults()
-    if let appLastOpen = sharedDefaults.objectForKey("appExitDate") as! NSDate? {
-      let rootView = self.window?.rootViewController as! ViewController
-      if NSDate().compare(appLastOpen) == .OrderedAscending {
-        rootView.billField.text = sharedDefaults.objectForKey("appExitBillAmount") as? String
-      }
-      rootView.textFieldChange(self)
-    }
   }
 
   func applicationDidBecomeActive(application: UIApplication) {
