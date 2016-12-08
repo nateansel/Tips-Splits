@@ -36,63 +36,57 @@ class SettingsViewController: UIViewController {
   
   // MARK: Miscellanious variables
   var keyboardHeight     = CGFloat()
-  let sharedDefaults     = NSUserDefaults()
+  let sharedDefaults     = UserDefaults()
   var showingStepperView = false
-  let formatter          = NSNumberFormatter()
+  let formatter          = NumberFormatter()
   
   
   
   // MARK: - Methods
+  
   // MARK: Override methods
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    formatter.numberStyle = .PercentStyle
+    formatter.numberStyle = .percent
     settingsView.layer.cornerRadius = 10
     settingsView.layer.masksToBounds = true
-    defaultTipSegmentedControl.selectedSegmentIndex  = sharedDefaults.integerForKey("defaultTipIndex")
-    colorSchemeSegmentedControl.selectedSegmentIndex = sharedDefaults.integerForKey("colorSchemeIndex")
+    defaultTipSegmentedControl.selectedSegmentIndex  = sharedDefaults.integer(forKey: "defaultTipIndex")
+    colorSchemeSegmentedControl.selectedSegmentIndex = sharedDefaults.integer(forKey: "colorSchemeIndex")
     colorSchemeChanged(self)
     
-    if sharedDefaults.doubleForKey("leftStepperValue") != 0 {
-      leftStepper.value = sharedDefaults.doubleForKey("leftStepperValue") * 100
-    }
-    else {
-      sharedDefaults.setDouble(0.18, forKey: "leftStepperValue")
+    if sharedDefaults.double(forKey: "leftStepperValue") != 0 {
+      leftStepper.value = sharedDefaults.double(forKey: "leftStepperValue") * 100
+    } else {
+      sharedDefaults.set(0.18, forKey: "leftStepperValue")
       leftStepper.value = 18
     }
-    defaultTipSegmentedControl.setTitle(formatter.stringFromNumber(leftStepper.value / 100), forSegmentAtIndex: 0)
+    defaultTipSegmentedControl.setTitle(formatter.string(from: NSNumber(value: leftStepper.value / 100)), forSegmentAt: 0)
     
     
-    if sharedDefaults.doubleForKey("centerStepperValue") != 0 {
-      centerStepper.value = sharedDefaults.doubleForKey("centerStepperValue") * 100
-    }
-    else {
-      sharedDefaults.setDouble(0.20, forKey: "centerStepperValue")
+    if sharedDefaults.double(forKey: "centerStepperValue") != 0 {
+      centerStepper.value = sharedDefaults.double(forKey: "centerStepperValue") * 100
+    } else {
+      sharedDefaults.set(0.20, forKey: "centerStepperValue")
       centerStepper.value = 20
     }
-    defaultTipSegmentedControl.setTitle(formatter.stringFromNumber(centerStepper.value / 100), forSegmentAtIndex: 1)
+    defaultTipSegmentedControl.setTitle(formatter.string(from: NSNumber(value: centerStepper.value / 100)), forSegmentAt: 1)
     
     
-    if sharedDefaults.doubleForKey("rightStepperValue") != 0 {
-      rightStepper.value = sharedDefaults.doubleForKey("rightStepperValue") * 100
-    }
-    else {
-      sharedDefaults.setDouble(0.25, forKey: "rightStepperValue")
+    if sharedDefaults.double(forKey: "rightStepperValue") != 0 {
+      rightStepper.value = sharedDefaults.double(forKey: "rightStepperValue") * 100
+    } else {
+      sharedDefaults.set(0.25, forKey: "rightStepperValue")
       rightStepper.value = 25
     }
-    defaultTipSegmentedControl.setTitle(formatter.stringFromNumber(rightStepper.value / 100), forSegmentAtIndex: 2)
+    defaultTipSegmentedControl.setTitle(formatter.string(from: NSNumber(value: rightStepper.value / 100)), forSegmentAt: 2)
   }
   
-  
-  
-  
-  
-  override func viewWillAppear(animated: Bool) {
+  override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     
-    if let rootView = UIApplication.sharedApplication().delegate!.window!!.rootViewController as! ViewController? {
-      self.keyboardHeight = rootView.keyboardHeight
+    if let rootView = UIApplication.shared.delegate!.window!!.rootViewController as! ViewController? {
+      keyboardHeight = rootView.keyboardHeight
     }
     settingsViewHeightConstraint.constant = view.frame.size.height
     settingsViewTopConstraint.constant    = settingsViewHeightConstraint.constant
@@ -101,15 +95,12 @@ class SettingsViewController: UIViewController {
     blurEverythingView.effect = nil
   }
   
-  
-  
-  
-  override func viewDidAppear(animated: Bool) {
+  override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     
-    UIView.animateWithDuration(0.25,
-      animations: {
-        self.blurEverythingView.effect = UIBlurEffect(style: UIBlurEffectStyle.Dark)
+    UIView.animate(withDuration: 0.25,
+      animations: { [unowned self] in
+        self.blurEverythingView.effect = UIBlurEffect(style: UIBlurEffectStyle.dark)
         self.settingsViewTopConstraint.constant = self.view.frame.size.height - self.keyboardHeight
         self.view.layoutIfNeeded()
     })
@@ -122,25 +113,21 @@ class SettingsViewController: UIViewController {
       stepperViewRightConstraint.constant = newRight
     }
     
-    leftStepperLeftConstraint.constant    = CGFloat((stepperViewWidthConstraint.constant / 6)       - (leftStepper.frame.size.width / 2))
-    centerStepperLeftConstraint.constant  = CGFloat((stepperViewWidthConstraint.constant / 2)       - (centerStepper.frame.size.width / 2))
-    rightStepperLeftConstraint.constant   = CGFloat(((stepperViewWidthConstraint.constant / 6) * 5) - (rightStepper.frame.size.width / 2))
+    leftStepperLeftConstraint.constant   = CGFloat((stepperViewWidthConstraint.constant / 6)       - (leftStepper.frame.size.width / 2))
+    centerStepperLeftConstraint.constant = CGFloat((stepperViewWidthConstraint.constant / 2)       - (centerStepper.frame.size.width / 2))
+    rightStepperLeftConstraint.constant  = CGFloat(((stepperViewWidthConstraint.constant / 6) * 5) - (rightStepper.frame.size.width / 2))
   }
-  
-  
-  
   
   // MARK: Color scheme
   
-  ///
   ///  Calls the correct method to update the color scheme to the new color
   ///  scheme. Fires a notification to alert the root view to update its colors
   ///  as well.
   ///
-  /// - author: Nathan Ansel
   /// - parameter sender: Any object that calls this method. Cannot be nil.
-  @IBAction func colorSchemeChanged(sender: AnyObject) {
-    sharedDefaults.setInteger(colorSchemeSegmentedControl.selectedSegmentIndex, forKey: "colorSchemeIndex")
+  ///
+  @IBAction func colorSchemeChanged(_ sender: AnyObject) {
+    sharedDefaults.set(colorSchemeSegmentedControl.selectedSegmentIndex, forKey: "colorSchemeIndex")
     sharedDefaults.synchronize()
     switch colorSchemeSegmentedControl.selectedSegmentIndex {
       case 0:
@@ -150,168 +137,126 @@ class SettingsViewController: UIViewController {
       default:
         print("color scheme not changed")
     }
-    NSNotificationCenter.defaultCenter().postNotificationName("colorSchemeChanged", object: nil)
+    NotificationCenter.default.post(name: Notification.Name(rawValue: "colorSchemeChanged"), object: nil)
   }
   
-  
-  
-  
-  ///
   ///  Animates the change to the blue color scheme.
-  ///
-  /// - author: Nathan Ansel
   ///
   func changeToBlueScheme() {
     let blueColor = UIColor(red:0.23, green:0.45, blue:0.74, alpha:1)
-    UIView.animateWithDuration(0.25, animations: {
+    UIView.animate(withDuration: 0.25, animations: { [unowned self] in
       self.colorSchemeSegmentedControl.tintColor = blueColor
       self.defaultTipSegmentedControl.tintColor  = blueColor
       self.editButton.tintColor                  = blueColor
       self.leftStepper.tintColor                 = blueColor
       self.centerStepper.tintColor               = blueColor
       self.rightStepper.tintColor                = blueColor
-      self.editButton.setImage(UIImage(named: "editButtonImageBlue"), forState: .Normal)
+      self.editButton.setImage(UIImage(named: "editButtonImageBlue"), for: UIControlState())
     })
   }
   
-  
-  
-  
-  ///
   ///  Animates the change to the orange color scheme.
-  ///
-  /// - author: Nathan Ansel
   ///
   func changeToOrangeScheme() {
     let orangeColor = UIColor(red:1, green:0.47, blue:0.2, alpha:1)
-    UIView.animateWithDuration(0.25, animations: {
+    UIView.animate(withDuration: 0.25, animations: { [unowned self] in
       self.colorSchemeSegmentedControl.tintColor = orangeColor
       self.defaultTipSegmentedControl.tintColor  = orangeColor
       self.editButton.tintColor                  = orangeColor
       self.leftStepper.tintColor                 = orangeColor
       self.centerStepper.tintColor               = orangeColor
       self.rightStepper.tintColor                = orangeColor
-      self.editButton.setImage(UIImage(named: "editButtonImageOrange"), forState: .Normal)
+      self.editButton.setImage(UIImage(named: "editButtonImageOrange"), for: UIControlState())
       self.settingsView.layoutIfNeeded()
     })
   }
   
-  
-  
-  
   // MARK: View animations
   
-  ///
   ///  Animates the settings view going up or down to show or hide the tip
   ///  amount editing UI elements underneath.
-  @IBAction func animateSettingsViewEditMode(sender: AnyObject) {
+  ///
+  @IBAction func animateSettingsViewEditMode(_ sender: AnyObject) {
     if !showingStepperView {
-      UIView.animateWithDuration(0.25,
+      UIView.animate(withDuration: 0.25,
         delay: 0,
-        options: UIViewAnimationOptions.CurveEaseInOut,
-        animations: {
-          self.editButton.transform = CGAffineTransformMakeRotation(CGFloat(M_PI))
-          self.settingsViewTopConstraint.constant = self.view.frame.size.height - (self.keyboardHeight + self.stepperView.frame.size.height)
+        options: UIViewAnimationOptions(),
+        animations: { [unowned self] in
+          self.editButton.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+          self.settingsViewTopConstraint.constant = self.view.frame.height - (self.keyboardHeight + self.stepperView.frame.height)
           self.view.layoutIfNeeded()
         }, completion: nil)
       showingStepperView = true
     }
     else {
-      UIView.animateWithDuration(0.25,
+      UIView.animate(withDuration: 0.25,
         delay: 0,
-        options: UIViewAnimationOptions.CurveEaseInOut,
-        animations: {
-          self.editButton.transform = CGAffineTransformMakeRotation(CGFloat(0))
-          self.settingsViewTopConstraint.constant = self.view.frame.size.height - self.keyboardHeight
+        options: UIViewAnimationOptions(),
+        animations: { [unowned self] in
+          self.editButton.transform = CGAffineTransform(rotationAngle: 0)
+          self.settingsViewTopConstraint.constant = self.view.frame.height - self.keyboardHeight
           self.view.layoutIfNeeded()
         }, completion: nil)
       showingStepperView = false
     }
   }
   
-  
-  
-  
-  ///
   ///  Animates the dismiss of the settings view controller. Called when any of
   ///  the blur view is tapped.
   ///
-  /// - author: Nathan Ansel
   /// - parameter sender: Any object that calls this method. Cannot be nil.
   ///
-  @IBAction func dismissViewController(sender: AnyObject) {
+  @IBAction func dismissViewController(_ sender: AnyObject) {
     sharedDefaults.synchronize()
-    UIView.animateWithDuration(0.25,
-      animations: {
+    UIView.animate(withDuration: 0.25,
+      animations: { [unowned self] in
         self.blurEverythingView.effect = nil
-        self.settingsViewTopConstraint.constant = self.view.frame.size.height
+        self.settingsViewTopConstraint.constant = self.view.frame.height
         self.view.layoutIfNeeded()
-      }, completion: { (finished: Bool) in
-        self.dismissViewControllerAnimated(true, completion: {
-          if let rootView = UIApplication.sharedApplication().delegate!.window!!.rootViewController as! ViewController? {
+      }, completion: { [unowned self] (finished: Bool) in
+        self.dismiss(animated: true, completion: {
+          if let rootView = UIApplication.shared.delegate!.window!!.rootViewController as! ViewController? {
             rootView.billField.becomeFirstResponder()
           }
         })
     })
   }
   
-  
-  
   // MARK: Value changes
   
-  ///
   ///  Called when the left tip segmented control is edited. Updates the value
   ///  stored in NSUserDefaults.
   ///
-  /// - author: Nathan Ansel
-  ///
-  @IBAction func leftTipChanged(sender: AnyObject) {
-    defaultTipSegmentedControl.setTitle(formatter.stringFromNumber(leftStepper.value / 100), forSegmentAtIndex: 0)
-    sharedDefaults.setDouble(leftStepper.value / 100, forKey: "leftStepperValue")
-    sharedDefaults.setBool(true, forKey: "refreshTipValues")
+  @IBAction func leftTipChanged(_ sender: AnyObject) {
+    defaultTipSegmentedControl.setTitle(formatter.string(from: NSNumber(value: leftStepper.value / 100)), forSegmentAt: 0)
+    sharedDefaults.set(leftStepper.value / 100, forKey: "leftStepperValue")
+    sharedDefaults.set(true, forKey: "refreshTipValues")
   }
   
-  
-  
-  
-  ///
   ///  Called when the center tip segmented control is edited. Updates the value
   ///  stored in NSUserDefaults.
   ///
-  /// - author: Nathan Ansel
-  ///
-  @IBAction func centerTipChanged(sender: AnyObject) {
-    defaultTipSegmentedControl.setTitle(formatter.stringFromNumber(centerStepper.value / 100), forSegmentAtIndex: 1)
-    sharedDefaults.setDouble(centerStepper.value / 100, forKey: "centerStepperValue")
-    sharedDefaults.setBool(true, forKey: "refreshTipValues")
+  @IBAction func centerTipChanged(_ sender: AnyObject) {
+    defaultTipSegmentedControl.setTitle(formatter.string(from: NSNumber(value: centerStepper.value / 100)), forSegmentAt: 1)
+    sharedDefaults.set(centerStepper.value / 100, forKey: "centerStepperValue")
+    sharedDefaults.set(true, forKey: "refreshTipValues")
   }
   
-  
-  
-  
-  ///
   ///  Called when the right tip segmented control is edited. Updates the value
   ///  stored in NSUserDefaults.
   ///
-  /// - author: Nathan Ansel
-  ///
-  @IBAction func rightTipChanged(sender: AnyObject) {
-    defaultTipSegmentedControl.setTitle(formatter.stringFromNumber(rightStepper.value / 100), forSegmentAtIndex: 2)
-    sharedDefaults.setDouble(rightStepper.value / 100, forKey: "rightStepperValue")
-    sharedDefaults.setBool(true, forKey: "refreshTipValues")
+  @IBAction func rightTipChanged(_ sender: AnyObject) {
+    defaultTipSegmentedControl.setTitle(formatter.string(from: NSNumber(value: rightStepper.value / 100)), forSegmentAt: 2)
+    sharedDefaults.set(rightStepper.value / 100, forKey: "rightStepperValue")
+    sharedDefaults.set(true, forKey: "refreshTipValues")
   }
   
-  
-  
-  ///
   ///  Called when the default tip segmented control is edited. Updates the value
   ///  stored in NSUserDefaults.
   ///
-  /// - author: Nathan Ansel
-  ///
-  @IBAction func defaultTipChanged(sender: AnyObject) {
-    sharedDefaults.setInteger(defaultTipSegmentedControl.selectedSegmentIndex, forKey: "defaultTipIndex")
-    sharedDefaults.setBool(true, forKey: "refreshDefaultTip")
+  @IBAction func defaultTipChanged(_ sender: AnyObject) {
+    sharedDefaults.set(defaultTipSegmentedControl.selectedSegmentIndex, forKey: "defaultTipIndex")
+    sharedDefaults.set(true, forKey: "refreshDefaultTip")
     sharedDefaults.synchronize()
   }
 }

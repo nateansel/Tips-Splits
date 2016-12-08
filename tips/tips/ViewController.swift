@@ -39,54 +39,52 @@ class ViewController: UIViewController {
   @IBOutlet weak var fivePersonSplitLabel:  UILabel!
   
   // MARK: Miscellanious variables
-  let sharedDefaults    = NSUserDefaults()
+  let sharedDefaults    = UserDefaults()
   var keyboardHeight    = CGFloat()
   var animationDuration = NSNumber()
-  var animationOptions  = UIViewAnimationOptions.CurveEaseIn
-  
-  
-  
+  var animationOptions  = UIViewAnimationOptions.curveEaseIn
   
   // MARK: - Methods
-  // MARK: Overrides
+  
+  // MARK: View Loading
   override func viewDidLoad() {
     super.viewDidLoad()
     // Do any additional setup after loading the view, typically from a nib.
     
-    NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
-    NSNotificationCenter.defaultCenter().addObserver(self, selector: "changeColorScheme:", name: "colorSchemeChanged", object: nil)
+    NotificationCenter.default.addObserver(self, selector: #selector(ViewController.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+    NotificationCenter.default.addObserver(self, selector: #selector(ViewController.changeColorScheme(_:)), name: NSNotification.Name(rawValue: "colorSchemeChanged"), object: nil)
 
-    currencyLabel.text = NSNumberFormatter().currencySymbol
+    currencyLabel.text = NumberFormatter().currencySymbol
     
     tipLabel.text = "$0.00"
     totalLabel.text = "$0.00"
     
     
-    sharedDefaults.setBool(true, forKey: "refreshTipValues")
-    tipAmount.selectedSegmentIndex = sharedDefaults.integerForKey("defaultTipIndex")
-    UIApplication.sharedApplication().statusBarStyle = .LightContent
-    NSNotificationCenter.defaultCenter().postNotificationName("colorSchemeChanged", object: nil)
+    sharedDefaults.set(true, forKey: "refreshTipValues")
+    tipAmount.selectedSegmentIndex = sharedDefaults.integer(forKey: "defaultTipIndex")
+    UIApplication.shared.statusBarStyle = .lightContent
+    NotificationCenter.default.post(name: Notification.Name(rawValue: "colorSchemeChanged"), object: nil)
     
-    billField.font             = UIFont.monospacedDigitSystemFontOfSize(billField.font!.pointSize,             weight: UIFontWeightThin)
-    tipLabel.font              = UIFont.monospacedDigitSystemFontOfSize(tipLabel.font!.pointSize,              weight: UIFontWeightThin)
-    totalLabel.font            = UIFont.monospacedDigitSystemFontOfSize(totalLabel.font!.pointSize,            weight: UIFontWeightThin)
-    twoPersonSplitLabel.font   = UIFont.monospacedDigitSystemFontOfSize(twoPersonSplitLabel.font!.pointSize,   weight: UIFontWeightThin)
-    threePersonSplitLabel.font = UIFont.monospacedDigitSystemFontOfSize(threePersonSplitLabel.font!.pointSize, weight: UIFontWeightThin)
-    fourPersonSplitLabel.font  = UIFont.monospacedDigitSystemFontOfSize(fourPersonSplitLabel.font!.pointSize,  weight: UIFontWeightThin)
-    fivePersonSplitLabel.font  = UIFont.monospacedDigitSystemFontOfSize(fivePersonSplitLabel.font!.pointSize,  weight: UIFontWeightThin)
+    billField.font             = UIFont.monospacedDigitSystemFont(ofSize: billField.font!.pointSize,             weight: UIFontWeightThin)
+    tipLabel.font              = UIFont.monospacedDigitSystemFont(ofSize: tipLabel.font!.pointSize,              weight: UIFontWeightThin)
+    totalLabel.font            = UIFont.monospacedDigitSystemFont(ofSize: totalLabel.font!.pointSize,            weight: UIFontWeightThin)
+    twoPersonSplitLabel.font   = UIFont.monospacedDigitSystemFont(ofSize: twoPersonSplitLabel.font!.pointSize,   weight: UIFontWeightThin)
+    threePersonSplitLabel.font = UIFont.monospacedDigitSystemFont(ofSize: threePersonSplitLabel.font!.pointSize, weight: UIFontWeightThin)
+    fourPersonSplitLabel.font  = UIFont.monospacedDigitSystemFont(ofSize: fourPersonSplitLabel.font!.pointSize,  weight: UIFontWeightThin)
+    fivePersonSplitLabel.font  = UIFont.monospacedDigitSystemFont(ofSize: fivePersonSplitLabel.font!.pointSize,  weight: UIFontWeightThin)
   }
   
   
   
   
   
-  override func viewWillAppear(animated: Bool) {
+  override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     
-    if let appLastOpen = sharedDefaults.objectForKey("appExitDate") as! NSDate? {
+    if let appLastOpen = sharedDefaults.object(forKey: "appExitDate") as! Date? {
       print("comparing")
-      if NSDate().compare(appLastOpen) == .OrderedAscending {
-        billField.text = sharedDefaults.stringForKey("appExitBillAmount")
+      if Date().compare(appLastOpen) == .orderedAscending {
+        billField.text = sharedDefaults.string(forKey: "appExitBillAmount")
       }
       else {
         billField.text = ""
@@ -100,7 +98,7 @@ class ViewController: UIViewController {
   
   
   
-  override func viewDidAppear(animated: Bool) {
+  override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     
     billField.becomeFirstResponder()
@@ -118,23 +116,18 @@ class ViewController: UIViewController {
   /// - parameter notifaction: An NSNotification activated when the keyboard
   ///                           will appear on screen.
   ///
-  func keyboardWillShow(notification: NSNotification) {
-    let keyboardFrame = (notification.userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
+  func keyboardWillShow(_ notification: Notification) {
+    let keyboardFrame = (notification.userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
     keyboardHeight = keyboardFrame.height
-    tipViewHeight.constant = view.frame.size.height - (keyboardHeight + 8 + billField.frame.size.height + UIApplication.sharedApplication().statusBarFrame.size.height)
+    tipViewHeight.constant = view.frame.size.height - (keyboardHeight + 8 + billField.frame.size.height + UIApplication.shared.statusBarFrame.size.height)
     scrollViewHeight.constant = tipViewHeight.constant - 46
-    if sharedDefaults.boolForKey("refreshDefaultTip") {
-      tipAmount.selectedSegmentIndex = sharedDefaults.integerForKey("defaultTipIndex")
-      sharedDefaults.setBool(false, forKey: "refreshDefaultTip")
+    if sharedDefaults.bool(forKey: "refreshDefaultTip") {
+      tipAmount.selectedSegmentIndex = sharedDefaults.integer(forKey: "defaultTipIndex")
+      sharedDefaults.set(false, forKey: "refreshDefaultTip")
     }
     changeTipAmountTitles()
   }
   
-  
-  
-  
-  
-  ///
   ///  Animates the change of the color scheme. Uses the colorIndex (a value set
   ///  in the settings) to determine which color scheme to animate to.
   ///
@@ -142,22 +135,22 @@ class ViewController: UIViewController {
   /// - parameter notification: An NSNotification activated when the color
   ///                            scheme needs to be changed.
   ///
-  func changeColorScheme(notification: NSNotification) {
-    let colorIndex = sharedDefaults.integerForKey("colorSchemeIndex")
+  func changeColorScheme(_ notification: Notification) {
+    let colorIndex = sharedDefaults.integer(forKey: "colorSchemeIndex")
     switch colorIndex {
       case 0:
         let blueColor      = UIColor(red:0.23, green:0.45, blue:0.74, alpha:1)
         let lightBlueColor = UIColor(red:0.49, green:0.75, blue:1, alpha:1)
-        UIView.animateWithDuration(0.25,
-          animations: {
+        UIView.animate(withDuration: 0.25,
+          animations: { [unowned self] in
             self.tipView.backgroundColor               = blueColor
             self.SettingsContainerView.backgroundColor = lightBlueColor
         })
       case 1:
         let orangeColor      = UIColor(red:1, green:0.47, blue:0.2, alpha:1)
         let lightOrangeColor = UIColor(red:1, green:0.81, blue:0.18, alpha:1)
-        UIView.animateWithDuration(0.25,
-          animations: {
+        UIView.animate(withDuration: 0.25,
+          animations: { [unowned self] in
             self.tipView.backgroundColor               = orangeColor
             self.SettingsContainerView.backgroundColor = lightOrangeColor
         })
@@ -166,12 +159,8 @@ class ViewController: UIViewController {
     }
   }
   
-  
-  
-  
   // MARK: Animations
   
-  ///
   ///  Animates the tipView sliding up onto the screen, or down off the screen.
   ///
   /// - author: Nathan Ansel
@@ -180,20 +169,19 @@ class ViewController: UIViewController {
   ///
   func animateTipView(up: Bool) {
     if up {
-      if self.tipViewConstraint.constant != 8 {
-        scrollView.setContentOffset(CGPointMake(0, 0), animated: true)
-        UIView.animateWithDuration(0.3,
-          animations: {
-            self.tipViewConstraint.constant = CGFloat(8)
+      if tipViewConstraint.constant != 8 {
+        scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
+        UIView.animate(withDuration: 0.3,
+          animations: { [unowned self] in
+            self.tipViewConstraint.constant = 8
             self.view.layoutIfNeeded()
         })
       }
-    }
-    else {
-      if self.tipViewConstraint.constant == 8 {
-        UIView.animateWithDuration(0.3,
-          animations: {
-            self.tipViewConstraint.constant = CGFloat(self.view.frame.size.height)
+    } else {
+      if tipViewConstraint.constant == 8 {
+        UIView.animate(withDuration: 0.3,
+          animations: { [unowned self] in
+            self.tipViewConstraint.constant = self.view.frame.height
             self.view.layoutIfNeeded()
         })
       }
@@ -209,34 +197,34 @@ class ViewController: UIViewController {
   /// - author: Nathan Ansel
   ///
   func changeTipAmountTitles() {
-    let formatter = NSNumberFormatter()
-    formatter.numberStyle = .PercentStyle
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .percent
     
-    if sharedDefaults.boolForKey("refreshTipValues") {
-      if sharedDefaults.doubleForKey("leftStepperValue") != 0 {
-        tipAmount.setTitle(formatter.stringFromNumber(sharedDefaults.doubleForKey("leftStepperValue")), forSegmentAtIndex: 0)
+    if sharedDefaults.bool(forKey: "refreshTipValues") {
+      if sharedDefaults.double(forKey: "leftStepperValue") != 0 {
+        tipAmount.setTitle(formatter.string(from: NSNumber(value: sharedDefaults.double(forKey: "leftStepperValue"))), forSegmentAt: 0)
       }
       else {
-        sharedDefaults.setDouble(0.18, forKey: "leftStepperValue")
-        tipAmount.setTitle("18%", forSegmentAtIndex: 0)
+        sharedDefaults.set(0.18, forKey: "leftStepperValue")
+        tipAmount.setTitle("18%", forSegmentAt: 0)
       }
       
-      if sharedDefaults.doubleForKey("centerStepperValue") != 0 {
-        tipAmount.setTitle(formatter.stringFromNumber(sharedDefaults.doubleForKey("centerStepperValue")), forSegmentAtIndex: 1)
+      if sharedDefaults.double(forKey: "centerStepperValue") != 0 {
+        tipAmount.setTitle(formatter.string(from: NSNumber(value: sharedDefaults.double(forKey: "centerStepperValue"))), forSegmentAt: 1)
       }
       else {
-        sharedDefaults.setDouble(0.20, forKey: "centerStepperValue")
-        tipAmount.setTitle("20%", forSegmentAtIndex: 1)
+        sharedDefaults.set(0.20, forKey: "centerStepperValue")
+        tipAmount.setTitle("20%", forSegmentAt: 1)
       }
       
-      if sharedDefaults.doubleForKey("rightStepperValue") != 0 {
-        tipAmount.setTitle(formatter.stringFromNumber(sharedDefaults.doubleForKey("rightStepperValue")), forSegmentAtIndex: 2)
+      if sharedDefaults.double(forKey: "rightStepperValue") != 0 {
+        tipAmount.setTitle(formatter.string(from: NSNumber(value: sharedDefaults.double(forKey: "rightStepperValue"))), forSegmentAt: 2)
       }
       else {
-        sharedDefaults.setDouble(0.25, forKey: "rightStepperValue")
-        tipAmount.setTitle("25%", forSegmentAtIndex: 2)
+        sharedDefaults.set(0.25, forKey: "rightStepperValue")
+        tipAmount.setTitle("25%", forSegmentAt: 2)
       }
-      sharedDefaults.setBool(false, forKey: "refreshTipValues")
+      sharedDefaults.set(false, forKey: "refreshTipValues")
     }
   }
 
@@ -253,43 +241,43 @@ class ViewController: UIViewController {
   ///
   /// - author: Nathan Ansel
   /// - parameter sender: Any object that calls this method. Cannot be nil.
-  @IBAction func textFieldChange(sender: AnyObject) {
-    let percentFormatter = NSNumberFormatter()
-    percentFormatter.numberStyle = .PercentStyle
+  @IBAction func textFieldChange(_ sender: AnyObject) {
+    let percentFormatter = NumberFormatter()
+    percentFormatter.numberStyle = .percent
     
-    let formatter = NSNumberFormatter()
-    formatter.numberStyle = .CurrencyStyle
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .currency
     
     if let billAmount = Double(billField.text!) {
-      let tip   = billAmount * Double(percentFormatter.numberFromString(tipAmount.titleForSegmentAtIndex(tipAmount.selectedSegmentIndex)!)!)
+      let tip   = billAmount * Double(percentFormatter.number(from: tipAmount.titleForSegment(at: tipAmount.selectedSegmentIndex)!)!)
       let total = billAmount + tip
       
-      tipLabel.text              = formatter.stringFromNumber(tip)
-      totalLabel.text            = formatter.stringFromNumber(total)
-      twoPersonSplitLabel.text   = formatter.stringFromNumber(total / 2)
-      threePersonSplitLabel.text = formatter.stringFromNumber(total / 3)
-      fourPersonSplitLabel.text  = formatter.stringFromNumber(total / 4)
-      fivePersonSplitLabel.text  = formatter.stringFromNumber(total / 5)
+      tipLabel.text              = formatter.string(from: NSNumber(value: tip))
+      totalLabel.text            = formatter.string(from: NSNumber(value: total))
+      twoPersonSplitLabel.text   = formatter.string(from: NSNumber(value: total / 2))
+      threePersonSplitLabel.text = formatter.string(from: NSNumber(value: total / 3))
+      fourPersonSplitLabel.text  = formatter.string(from: NSNumber(value: total / 4))
+      fivePersonSplitLabel.text  = formatter.string(from: NSNumber(value: total / 5))
       
-      animateTipView(true)
+      animateTipView(up: true)
     }
     else {
       if billField.text == "." {
-        animateTipView(true)
+        animateTipView(up: true)
       }
       else {
-        animateTipView(false)
+        animateTipView(up: false)
       }
       
       tipLabel.text = "$0.00"
       totalLabel.text = "$0.00"
     }
     
-    if billField.text!.containsString(".") {
-      billField.keyboardType = .NumberPad
+    if billField.text!.contains(".") {
+      billField.keyboardType = .numberPad
     }
     else {
-      billField.keyboardType = .DecimalPad
+      billField.keyboardType = .decimalPad
     }
     billField.reloadInputViews()
   }
